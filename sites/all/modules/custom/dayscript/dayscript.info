@@ -1,0 +1,9 @@
+name        = Dayscript
+description = "Change mode Asc Desc result Json"
+core        = 7.x
+package     = Dayscript
+; Information added by Drupal.org packaging script on 2017-06-26
+version = "7.x-1"
+core = "7.x"
+project = "dayscript"
+datestamp = "1498506247"

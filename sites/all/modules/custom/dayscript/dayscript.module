@@ -1,0 +1,131 @@
+<?php
+
+
+/**
+ * Implements hook_help().
+ */
+function dayscript_help($path, $arg) {
+  Global $base_url;	
+  switch ($path) {
+    case 'admin/help#dayscript':
+      return '<div class="help">' . t('dayscript', array('dayscript' => 'Arg (orderby = (DESC || ASC)),(pager = (1|2|3))')) . '<br>'. 
+            l('Example', $base_url . '/resultados-basic-page?orderby=DESC&pager=2'); '</div>';
+  }
+}
+
+
+
+/**
+ * Implementation of hook_views_api().
+ */
+function dayscript_views_api() {
+    return array(
+     'api' => 3,
+     'path' => drupal_get_path('module', 'dayscript') . '/views',
+   );   
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function dayscript_block_info() {
+  $blocks['update_nodes'] = array(
+    'info' => t('Update Nodes'),
+    'cache' => DRUPAL_NO_CACHE
+  );
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function dayscript_block_view($delta = '') {
+  $block = array();
+
+  switch ($delta) {
+    case 'update_nodes':
+      $block['subject'] = t('Update title nodes');
+      $block['content'] = drupal_get_form('dayscript_form');
+      break;
+    
+  }
+  return $block;
+}
+
+/**
+ * Implements hook_form().
+ */
+
+function dayscript_form($node, &$form_state) {
+	$form['nid'] = array(
+       '#type' => 'select',
+       '#title' => t('Please Select node to update'),
+       '#options' => search_nodes(),
+   );
+
+	$form['title'] = array(
+	  '#type' => 'textfield', 
+	  '#title' => t('Please write text to update (title)'), 
+	  '#size' => 20, 
+	  '#maxlength' => 255, 
+	  '#required' => TRUE,
+	);
+
+    $form['submit'] = array(
+   	  '#type' => 'submit',
+      '#value' => t('Submit'),
+  	);
+  return $form;
+}
+
+/**
+ * Implements hook_form().
+ */
+
+function dayscript_form_submit($form, &$form_state) {
+    $nid   = $form_state['values']['nid'];
+    $title = $form_state['values']['title'];;
+
+	$curl = curl_init();
+
+	curl_setopt_array($curl, array(
+	  CURLOPT_URL => "http://localhost/dayscript/request/node/".$nid.".json",
+	  CURLOPT_RETURNTRANSFER => true,
+	  CURLOPT_ENCODING => "",
+	  CURLOPT_MAXREDIRS => 10,
+	  CURLOPT_TIMEOUT => 30,
+	  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+	  CURLOPT_CUSTOMREQUEST => "PUT",
+	  CURLOPT_POSTFIELDS => "{\"nid\":\"$nid\",\"title\":\"$title\"}",
+	  CURLOPT_HTTPHEADER => array(
+	    "cache-control: no-cache",
+	    "content-type: application/json",
+	  ),
+	));
+
+	$response = curl_exec($curl);
+	$err = curl_error($curl);
+
+	curl_close($curl);
+
+	if ($err) {
+	  echo "cURL Error #:" . $err;
+	} else {
+	  echo $response;
+	}
+ return drupal_set_message(t('update node ' . $nid), 'status', FALSE);
+}
+
+
+function search_nodes(){
+  $query = new EntityFieldQuery();
+  $result = $query->entityCondition('entity_type', 'node')
+    ->entityCondition('bundle', 'article')
+    ->execute();
+
+  foreach ($result['node'] as $key => $value) {
+    	$nids[$value->nid] = $value->nid;
+   }  
+
+  return $nids;  
+}
