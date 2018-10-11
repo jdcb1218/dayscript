@@ -4,7 +4,8 @@
  * Implementation of hook_views_query_alter().
  */
 function dayscript_views_query_alter(&$view, &$query) {
-    if ($view->name == 'resultados_') {
+    if ($view->name == 'resultados_' && isset($_GET["orderby"])) {
+      
       $view->query->orderby[FALSE]['direction'] = $_GET["orderby"];
   }
 }
