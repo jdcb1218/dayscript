@@ -9,7 +9,7 @@ function dayscript_help($path, $arg) {
   switch ($path) {
     case 'admin/help#dayscript':
       return '<div class="help">' . t('dayscript', array('dayscript' => 'Arg (orderby = (DESC || ASC)),(pager = (1|2|3))')) . '<br>'. 
-            l('Example', $base_url . '/resultados-basic-page?orderby=DESC&pager=2'); '</div>';
+            l('Example', $base_url . '/resultados-basic-page?orderby=DESC&page=2'); '</div>';
   }
 }
 
